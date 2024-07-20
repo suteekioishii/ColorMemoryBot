@@ -19,8 +19,13 @@ var testDB =[
 
 //データベース用の記述
 const Sequelize = require('sequelize');
-let DB_INFO = "postgres://colormemory:myPostgres@localhost:5432/colormemory";
+let DB_INFO //= "postgres://colormemory:myPostgres@localhost:5432/colormemory";
 let pg_option = {};
+
+if (process.env.DATABASE_URL) {
+  DB_INFO = process.env.DATABASE_URL;
+  pg_option = { ssl: { rejectUnauthorized: false } };
+}
 
 if (process.env.DATABASE_URL) {
   DB_INFO = process.env.DATABASE_URL;
