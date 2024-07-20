@@ -111,7 +111,7 @@ module.exports = (robot) => {
       });
   });
 
-  robot.respond(/^testDB.*add$/i, (res) => {
+  robot.respond(/testDB.*add/i, (res) => {
     //testデータ追加用
     for (const e of testDB) {
     sequelize.sync({ force: false, alter: true })
@@ -121,7 +121,7 @@ module.exports = (robot) => {
     });
     console.log(e);
     }
-    res.send('追加完了');
+    res.send('テストデータの追加完了');
 });
   
   robot.respond(/throw([\s\S])([\s\S]*)/i, (res) => {
