@@ -121,6 +121,7 @@ module.exports = (robot) => {
     });
     console.log(e);
     }
+    res.send('追加完了');
 });
   
   robot.respond(/throw([\s\S])([\s\S]*)/i, (res) => {
