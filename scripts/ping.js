@@ -49,15 +49,6 @@ const sequelize = new Sequelize(DB_INFO,
       freezeTableName: true   // stick to the table name we defined
     });
 
-//testデータ追加用
-for (const e of testDB) {
-  sequelize.sync({ force: false, alter: true })
-  .then(addMessage(e["user"],e["message"]))
-  .catch((mes) => {
-    console.log("db connection error", mes);
-  });
-  console.log(e);
-}
 
 function addMessage(user,message) {
   console.log("db connection succeeded");
@@ -113,17 +104,24 @@ function getRandomMessage(res,user) {
 module.exports = (robot) => {
   robot.respond(/PING$/i, (res) => {
       res.send('PONG');
-
-      
       sequelize.sync({ force: false, alter: true })
       .then(addMessage)
       .catch((mes) => {
         console.log("db connection error", mes);
       });
-      
-
-      
   });
+
+  robot.respond(/^testDB.*add$/i, (res) => {
+    //testデータ追加用
+    for (const e of testDB) {
+    sequelize.sync({ force: false, alter: true })
+    .then(addMessage(e["user"],e["message"]))
+    .catch((mes) => {
+      console.log("db connection error", mes);
+    });
+    console.log(e);
+    }
+});
   
   robot.respond(/throw([\s\S])([\s\S]*)/i, (res) => {
       let arrayM = res.match[2].split(/\n/);
