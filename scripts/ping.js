@@ -7,6 +7,7 @@
 //   time - Reply with current time
 'use strict';
 
+const moment = require('moment');
 //データベース用の記述
 const Sequelize = require('sequelize');
 let DB_INFO = "postgres://colormemory:myPostgres@localhost:5432/colormemory";
@@ -53,6 +54,36 @@ function addMessage(user,message) {
   }
 
 
+// ランダムにメッセージを取得する関数
+function getRandomMessage(res,user) {
+  MessagesDB.findAll({
+    where: {
+      username: {
+        [Sequelize.Op.ne]: user
+      }
+    },
+    order: sequelize.random(),
+    limit: 1
+  })
+.then((message) => {
+  if (message) {
+    res.send("メッセージが流れ着きました");
+    message = message[0];
+    var Date = moment(message.createdAt).format('M月 D日 H:mm:ss');
+    //バッククォートで変数の置換。ダブルクオーテーションではだめ。
+    res.send(`投稿者 ${message.username}\n投稿日時 ${Date}\n\n ${message.message}`);
+    return message.destroy();
+  } else {
+    res.send("No messages found in the database.");
+  }
+})
+.catch((err) => {
+  console.log("db fetch error", err);
+  res.send("Error fetching message from the database.");
+});
+}
+
+
 ///////////以下からchatbot
 module.exports = (robot) => {
   robot.respond(/PING$/i, (res) => {
@@ -71,18 +102,21 @@ module.exports = (robot) => {
   
   robot.respond(/throw([\s\S])([\s\S]*)/i, (res) => {
       let arrayM = res.match[2].split(/\n/);
-      let user  = arrayM[0];
-      let message = arrayM[1];
-      res.send(arrayM[0]);
-      res.send("a");
-      sequelize.sync({ force: false, alter: true })
-      .then(addMessage(user,message))
-      .catch((mes) => {
-        console.log("db connection error", mes);
-  });
-      
-
-      
+      if(arrayM.length ==2){
+        let user  = arrayM[0];
+        let message = arrayM[1];
+        res.send("メッセージを投げ入れました。");
+        sequelize.sync({ force: false, alter: true })
+        .then(() => {
+          getRandomMessage(res,user);
+        })
+        .then(addMessage(user,message))
+        .catch((mes) => {
+          console.log("db connection error", mes);
+        });
+      }else{
+        res.send("throwは以下のフォーマットのみ対応しています。\n\n投稿者名\n本文");
+      };nn
   });
 
   robot.respond(/ADAPTER$/i, (res) => {
